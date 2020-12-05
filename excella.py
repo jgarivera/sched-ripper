@@ -73,15 +73,26 @@ class Excella:
         self.__draw(worksheet, offset, "SS191")
 
     def __draw(self, worksheet, offset, section):
-        workbook = self.workbook
         buckets = self.__load_buckets(section)
+
+        # Draw railings
+        self.__draw_railings(worksheet, offset)
+        
+        # Draw schedule blocks
+        curr_row = offset + 1
+        self.__draw_sched_cell(
+            worksheet, curr_row, Excella.SCHED_BLOCK_COLUMN_START + 1, "DESALGO", "9:30 AM to 11:30 AM")
+
+    def __draw_railings(self, worksheet, offset):
+        workbook = self.workbook
         curr_row = offset + 1
 
         # Draw time rows... 7:30 am to 5:00 pm rows
         time_format = workbook.add_format()
         time_format.set_align("right")
         for time in Excella.INTERVALS.keys():
-            worksheet.write(curr_row, Excella.SCHED_BLOCK_COLUMN_START, time, time_format)
+            worksheet.write(
+                curr_row, Excella.SCHED_BLOCK_COLUMN_START, time, time_format)
             curr_row += 1
 
         # Draw day columns... Monday to Saturday
@@ -95,16 +106,17 @@ class Excella:
             worksheet.write(curr_row, curr_col, day, day_format)
             curr_col += 1
 
-        # self.__draw_sched_cell(worksheet)
+    def __draw_sched_cell(self, worksheet, row, col, name, sched):
+        """
+            Draws a schedule cell. Returns the next row it traveled to
+        """
+        sched_format = self.workbook.add_format()
+        sched_format.set_bg_color("gold")
 
-    def __draw_sched_cell(self, worksheet, name, sched):
-        format = self.workbook.add_format()
-        format.set_bg_color('green')
-
-        worksheet.write(row, col, "", format)
-        worksheet.write(row + 1, col, name, format)
-        worksheet.write(row + 2, col, sched, format)
-        worksheet.write(row + 3, col, "", format)
+        worksheet.write(row, col, "", sched_format)
+        worksheet.write(row + 1, col, name, sched_format)
+        worksheet.write(row + 2, col, sched, sched_format)
+        worksheet.write(row + 3, col, "", sched_format)
         return row + 4
 
     def __load_buckets(self, section_name):
