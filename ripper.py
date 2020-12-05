@@ -22,9 +22,6 @@ class Ripper:
         for key, value in self.entries.items():
             print(key)
 
-        e = self.entries["SS191"]
-        print(json.dumps(e))
-
         # There are 318 subject offerings
         f.close()
 
@@ -74,7 +71,5 @@ class Ripper:
         # Append created subject entry object
         self.entries[section].append(sub_entry)
 
-
-if __name__ == "__main__":
-    r = Ripper("subjectoffering.json")
-    r.load()
+    def get_entries(self):
+        return self.entries
