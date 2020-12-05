@@ -52,7 +52,9 @@ class Excella:
         "03:30 PM": 17,
         "04:00 PM": 18,
         "04:30 PM": 19,
-        "05:00 PM": 20
+        "05:00 PM": 20,
+        "05:30 PM": 21,
+        "06:00 PM": 22
     }
 
     def __init__(self, entries, export_name):
@@ -73,7 +75,7 @@ class Excella:
         self.__set_columns(worksheet)
 
         offset = Excella.HORIZONTAL_CELL_OFFSET
-        self.__draw(worksheet, offset, "SS191")
+        self.__draw(worksheet, offset, "MI191")
 
     def __draw(self, worksheet, offset, section):
         buckets = self.__load_buckets(section)
@@ -120,14 +122,14 @@ class Excella:
 
         # Draw cell name
         curr_row += 1
-        worksheet.write(curr_row, col, sch_obj["name"], sched_format)
+        worksheet.write(curr_row, col, sch_obj["code"], sched_format)
 
         # Draw cell time
         curr_row += 1
         worksheet.write(curr_row, col, sch_obj["time"], sched_format)
 
         curr_row += 1
-        for i in range(curr_row, curr_row + (end - start - 3)):
+        for i in range(curr_row, curr_row + (end - start - 2)):
             worksheet.write(i, col, "", sched_format)
 
     def __draw_railings(self, worksheet, offset):
@@ -176,8 +178,8 @@ class Excella:
                 end = self.__convert_time(sch["time_end"])
 
                 sch_obj["time"] = f"{start} - {end}"
-                sch_obj["time_start_interval"] = Excella.INTERVALS[start]
-                sch_obj["time_end_interval"] = Excella.INTERVALS[end]
+                sch_obj["time_start_interval"] = self.__get_interval(start)
+                sch_obj["time_end_interval"] = self.__get_interval(end)
 
                 # Insert into day bucket
                 bucket = buckets[Excella.DAYS.index(day)]
@@ -189,8 +191,21 @@ class Excella:
 
         return buckets
 
+    def __get_interval(self, interval):
+        try:
+            interval = Excella.INTERVALS[interval]
+        except KeyError:
+            dt = self.__to_dt(interval)
+            for k in Excella.INTERVALS.keys():
+                if self.__to_dt(k) >= dt:
+                    interval = Excella.INTERVALS[k]
+        return interval
+
     def __convert_time(self, military_time):
         return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p').strip()
+
+    def __to_dt(self, time):
+        return datetime.strptime(time, '%I:%M %p')
 
     def __set_columns(self, worksheet):
         if not self.has_set_columns:
