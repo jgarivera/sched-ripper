@@ -62,14 +62,44 @@ class Excella:
 
     def begin(self):
         """
-            Draws a sched block
+            Begins drawing cycle
         """
         worksheet = self.workbook.add_worksheet()
 
         self.__set_columns(worksheet)
-        self.draw("SS191")
+        offset = Excella.HORIZONTAL_CELL_OFFSET
+        self.__draw(worksheet, offset, "SS191")
 
-    def draw(self, section_name):
+    def __draw(self, worksheet, offset, section):
+        buckets = self.__load_buckets(section)
+        curr_row = offset + 1
+
+        # Draw time rows... 7:30 am to 5:00 pm rows
+        for time in Excella.INTERVALS.keys():
+            worksheet.write(curr_row, Excella.SCHED_BLOCK_COLUMN_START, time)
+            curr_row += 1
+
+        # Draw day columns... Monday to Saturday
+        curr_row = offset
+        curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1
+
+        for day in Excella.DAYS:
+            worksheet.write(curr_row, curr_col, day)
+            curr_col += 1
+
+        # self.__draw_sched_cell(worksheet)
+
+    def __draw_sched_cell(self, worksheet, name, sched):
+        format = self.workbook.add_format()
+        format.set_bg_color('green')
+
+        worksheet.write(row, col, "", format)
+        worksheet.write(row + 1, col, name, format)
+        worksheet.write(row + 2, col, sched, format)
+        worksheet.write(row + 3, col, "", format)
+        return row + 4
+
+    def __load_buckets(self, section_name):
         section = self.entries[section_name]
         buckets = [[] for _ in range(len(Excella.DAYS))]
 
@@ -101,9 +131,10 @@ class Excella:
                 bucket.append(sch_obj)
 
                 # Sort by time start
-                bucket.sort(key=lambda x: x["time_start_interval"], reverse=False)
+                bucket.sort(
+                    key=lambda x: x["time_start_interval"], reverse=False)
 
-        print(json.dumps(buckets[3]))
+        return buckets
 
     def __convert_time(self, military_time):
         return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p').strip()

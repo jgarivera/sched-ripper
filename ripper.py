@@ -20,7 +20,7 @@ class Ripper:
         self.__build(json.load(f))
 
         for key, value in self.entries.items():
-            print(key)
+            print(key, end=", ")
 
         # There are 318 subject offerings
         f.close()
