@@ -66,25 +66,33 @@ class Excella:
         """
         worksheet = self.workbook.add_worksheet()
 
+        # Set column stylings
         self.__set_columns(worksheet)
+
         offset = Excella.HORIZONTAL_CELL_OFFSET
         self.__draw(worksheet, offset, "SS191")
 
     def __draw(self, worksheet, offset, section):
+        workbook = self.workbook
         buckets = self.__load_buckets(section)
         curr_row = offset + 1
 
         # Draw time rows... 7:30 am to 5:00 pm rows
+        time_format = workbook.add_format()
+        time_format.set_align("right")
         for time in Excella.INTERVALS.keys():
-            worksheet.write(curr_row, Excella.SCHED_BLOCK_COLUMN_START, time)
+            worksheet.write(curr_row, Excella.SCHED_BLOCK_COLUMN_START, time, time_format)
             curr_row += 1
 
         # Draw day columns... Monday to Saturday
         curr_row = offset
         curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1
+        day_format = workbook.add_format()
+        day_format.set_bold(True)
+        day_format.set_align("center")
 
         for day in Excella.DAYS:
-            worksheet.write(curr_row, curr_col, day)
+            worksheet.write(curr_row, curr_col, day, day_format)
             curr_col += 1
 
         # self.__draw_sched_cell(worksheet)
@@ -144,6 +152,8 @@ class Excella:
             # Set column widths
             start = Excella.SCHED_BLOCK_COLUMN_START
             worksheet.set_column(start, start, Excella.TIME_CELL_WIDTH)
+            worksheet.set_column(
+                start + 1, Excella.SCHED_BLOCK_COLUMN_END, Excella.SCHED_CELL_WIDTH)
             self.has_set_columns = True
 
     def close(self):
