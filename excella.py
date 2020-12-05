@@ -84,22 +84,25 @@ class Excella:
 
         # Draw schedule blocks
         curr_row = offset + 1
-        idx = 0
-        for day in buckets:
-
-            # Temporary
-            if idx > 0:
-                break
-
-            curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1
+        colors = {}
+        for i in range(len(buckets)):
+            curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1 + i
+            day = buckets[i]
 
             for sch_obj in day:
-                color = Excella.COLORS[color_index]
-                color_index += 1
-                curr_row = self.__draw_sched_cell(
+
+                # Get new color if not yet registered
+                code = sch_obj["code"]
+                if code not in colors:
+                    color = Excella.COLORS[color_index]
+                    colors[code] = color
+                    color_index += 1
+                else:
+                    color = colors[code]
+
+                # Draw schedule cell
+                self.__draw_sched_cell(
                     worksheet, curr_row, curr_col, sch_obj, color)
-            # Temporary
-            idx += 1
 
     def __draw_sched_cell(self, worksheet, row, col, sch_obj, color):
         """
@@ -109,7 +112,10 @@ class Excella:
         sched_format.set_bg_color(color)
 
         # Draw top part of the cell
-        curr_row = row
+        start = sch_obj["time_start_interval"]
+        end = sch_obj["time_end_interval"]
+
+        curr_row = row + start
         worksheet.write(curr_row, col, "", sched_format)
 
         # Draw cell name
@@ -120,7 +126,9 @@ class Excella:
         curr_row += 1
         worksheet.write(curr_row, col, sch_obj["time"], sched_format)
 
-        return curr_row + 1
+        curr_row += 1
+        for i in range(curr_row, curr_row + (end - start - 3)):
+            worksheet.write(i, col, "", sched_format)
 
     def __draw_railings(self, worksheet, offset):
         workbook = self.workbook
