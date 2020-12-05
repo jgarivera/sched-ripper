@@ -101,10 +101,10 @@ class Excella:
                 bucket.append(sch_obj)
 
                 # Sort by time start
-                bucket.sort(key=lambda x: datetime.strptime(
-                    x["time_start"], '%I:%M %p'), reverse=False)
+                bucket.sort(key=lambda x: x["time_start_interval"], reverse=False)
 
-        print(json.dumps(buckets[0]))
+        print(json.dumps(buckets[3]))
+
     def __convert_time(self, military_time):
         return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p').strip()
 
