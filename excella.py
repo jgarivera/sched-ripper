@@ -24,7 +24,33 @@ class Excella:
     TIME_CELL_WIDTH = 12.57
     SCHED_CELL_WIDTH = 25.00
 
+    # Day strings
     DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
+    # Time intervals
+    INTERVALS = {
+        "07:00 AM": 0,
+        "07:30 AM": 1,
+        "08:00 AM": 2,
+        "08:30 AM": 3,
+        "09:00 AM": 4,
+        "09:30 AM": 5,
+        "10:00 AM": 6,
+        "10:30 AM": 7,
+        "11:00 AM": 8,
+        "11:30 AM": 9,
+        "12:00 PM": 10,
+        "12:30 PM": 11,
+        "01:00 PM": 12,
+        "01:30 PM": 13,
+        "02:00 PM": 14,
+        "02:30 PM": 15,
+        "03:00 PM": 16,
+        "03:30 PM": 17,
+        "04:00 PM": 18,
+        "04:30 PM": 19,
+        "05:00 PM": 20
+    }
 
     def __init__(self, entries, export_name):
         self.workbook = xlsxwriter.Workbook(export_name)
@@ -61,20 +87,26 @@ class Excella:
                 sch_obj["name"] = subject["name"]
                 sch_obj["code"] = subject["code"]
                 sch_obj["room"] = sch["room"]
-                sch_obj["time_start"] = self.__convert_time(sch["time_start"])
-                sch_obj["time_end"] = self.__convert_time(sch["time_end"])
+
+                start = self.__convert_time(sch["time_start"])
+                end = self.__convert_time(sch["time_end"])
+
+                sch_obj["time_start"] = start
+                sch_obj["time_end"] = end
+                sch_obj["time_start_interval"] = Excella.INTERVALS[start]
+                sch_obj["time_end_interval"] = Excella.INTERVALS[end]
 
                 # Insert into day bucket
-                index = Excella.DAYS.index(day)
-                bucket = buckets[index]
+                bucket = buckets[Excella.DAYS.index(day)]
                 bucket.append(sch_obj)
 
                 # Sort by time start
                 bucket.sort(key=lambda x: datetime.strptime(
                     x["time_start"], '%I:%M %p'), reverse=False)
 
+        print(json.dumps(buckets[0]))
     def __convert_time(self, military_time):
-        return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p')
+        return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p').strip()
 
     def __set_columns(self, worksheet):
         if not self.has_set_columns:
