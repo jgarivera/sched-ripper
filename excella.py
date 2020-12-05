@@ -27,6 +27,9 @@ class Excella:
     # Day strings
     DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
+    # Color hex strings
+    COLORS = ["#70AD47", "#B4C6E7", "#ED7D31", "#F4B084", "#FFE699", "#C00000"]
+
     # Time intervals
     INTERVALS = {
         "07:00 AM": 0,
@@ -74,14 +77,50 @@ class Excella:
 
     def __draw(self, worksheet, offset, section):
         buckets = self.__load_buckets(section)
+        color_index = 0
 
         # Draw railings
         self.__draw_railings(worksheet, offset)
-        
+
         # Draw schedule blocks
         curr_row = offset + 1
-        self.__draw_sched_cell(
-            worksheet, curr_row, Excella.SCHED_BLOCK_COLUMN_START + 1, "DESALGO", "9:30 AM to 11:30 AM")
+        idx = 0
+        for day in buckets:
+
+            # Temporary
+            if idx > 0:
+                break
+
+            curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1
+
+            for sch_obj in day:
+                color = Excella.COLORS[color_index]
+                color_index += 1
+                curr_row = self.__draw_sched_cell(
+                    worksheet, curr_row, curr_col, sch_obj, color)
+            # Temporary
+            idx += 1
+
+    def __draw_sched_cell(self, worksheet, row, col, sch_obj, color):
+        """
+            Draws a schedule cell. Returns the next row it traveled to
+        """
+        sched_format = self.workbook.add_format()
+        sched_format.set_bg_color(color)
+
+        # Draw top part of the cell
+        curr_row = row
+        worksheet.write(curr_row, col, "", sched_format)
+
+        # Draw cell name
+        curr_row += 1
+        worksheet.write(curr_row, col, sch_obj["name"], sched_format)
+
+        # Draw cell time
+        curr_row += 1
+        worksheet.write(curr_row, col, sch_obj["time"], sched_format)
+
+        return curr_row + 1
 
     def __draw_railings(self, worksheet, offset):
         workbook = self.workbook
@@ -106,19 +145,6 @@ class Excella:
             worksheet.write(curr_row, curr_col, day, day_format)
             curr_col += 1
 
-    def __draw_sched_cell(self, worksheet, row, col, name, sched):
-        """
-            Draws a schedule cell. Returns the next row it traveled to
-        """
-        sched_format = self.workbook.add_format()
-        sched_format.set_bg_color("gold")
-
-        worksheet.write(row, col, "", sched_format)
-        worksheet.write(row + 1, col, name, sched_format)
-        worksheet.write(row + 2, col, sched, sched_format)
-        worksheet.write(row + 3, col, "", sched_format)
-        return row + 4
-
     def __load_buckets(self, section_name):
         section = self.entries[section_name]
         buckets = [[] for _ in range(len(Excella.DAYS))]
@@ -141,8 +167,7 @@ class Excella:
                 start = self.__convert_time(sch["time_start"])
                 end = self.__convert_time(sch["time_end"])
 
-                sch_obj["time_start"] = start
-                sch_obj["time_end"] = end
+                sch_obj["time"] = f"{start} - {end}"
                 sch_obj["time_start_interval"] = Excella.INTERVALS[start]
                 sch_obj["time_end_interval"] = Excella.INTERVALS[end]
 
