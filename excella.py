@@ -77,16 +77,53 @@ class Excella:
         offset = Excella.HORIZONTAL_CELL_OFFSET
         self.__draw(worksheet, offset, "MI191")
 
-    def __draw(self, worksheet, offset, section):
+    def __draw(self, worksheet, offset, section, officers):
+        """
+            Draws a schedule block given a section and its officers
+        """
         buckets = self.__load_buckets(section)
-        color_index = 0
+
+        # Draw metadata
+        self.__draw_metadata(worksheet, offset, section, officers)
 
         # Draw railings
         self.__draw_railings(worksheet, offset)
 
         # Draw schedule blocks
+        self.__draw_schedules(worksheet, offset, buckets)
+
+    def __draw_metadata(self, worksheet, offset, section, officers):
+        """
+            Draws schedule metadata
+        """
+        curr_row = offset
+        curr_col = Excella.SCHED_BLOCK_COLUMN_START
+
+        # Draw section text
+        section_format = self.workbook.add_format()
+        section_format.set_bold(True)
+        section_format.set_align("center")
+
+        worksheet.write(curr_row, curr_col, section, section_format)
+
+        # Draw position text
+        pos_col = Excella.SCHED_BLOCK_COLUMN_START + 1
+        officers_col = Excella.SCHED_BLOCK_COLUMN_START + 3
+
+        pos_format = self.workbook.add_format()
+        pos_format.set_bold(True)
+
+        for officer in officers:
+            worksheet.write(curr_row, )
+
+    def __draw_schedules(self, worksheet, offset, buckets):
+        """
+            Draws the schedule blocks for the given bucket
+        """
         curr_row = offset + 1
         colors = {}
+        color_index = 0
+
         for i in range(len(buckets)):
             curr_col = Excella.SCHED_BLOCK_COLUMN_START + 1 + i
             day = buckets[i]
@@ -108,7 +145,7 @@ class Excella:
 
     def __draw_sched_cell(self, worksheet, row, col, sch_obj, color):
         """
-            Draws a schedule cell. Returns the next row it traveled to
+            Draws a schedule cell with its subject code and time
         """
         sched_format = self.workbook.add_format()
         sched_format.set_bg_color(color)
@@ -133,12 +170,17 @@ class Excella:
             worksheet.write(i, col, "", sched_format)
 
     def __draw_railings(self, worksheet, offset):
+        """
+            Draws time rows and day columns
+        """
         workbook = self.workbook
         curr_row = offset + 1
 
         # Draw time rows... 7:30 am to 5:00 pm rows
         time_format = workbook.add_format()
         time_format.set_align("right")
+        time_format.set_indent(1)
+
         for time in Excella.INTERVALS.keys():
             worksheet.write(
                 curr_row, Excella.SCHED_BLOCK_COLUMN_START, time, time_format)
@@ -195,10 +237,12 @@ class Excella:
         try:
             interval = Excella.INTERVALS[interval]
         except KeyError:
+            # Get nearest interval if not explicitly found in dictionary
             dt = self.__to_dt(interval)
             for k in Excella.INTERVALS.keys():
                 if self.__to_dt(k) >= dt:
                     interval = Excella.INTERVALS[k]
+
         return interval
 
     def __convert_time(self, military_time):
