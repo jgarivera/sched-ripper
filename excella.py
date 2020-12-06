@@ -175,6 +175,7 @@ class Excella:
         """
         sched_format = self.workbook.add_format()
         sched_format.set_bg_color(color)
+        sched_format.set_align("center")
 
         # Draw top part of the cell
         start = sch_obj["time_start_interval"]
@@ -185,7 +186,9 @@ class Excella:
 
         # Draw cell name
         curr_row += 1
-        worksheet.write(curr_row, col, sch_obj["code"], sched_format)
+        code = sch_obj["code"]
+        room = sch_obj["room"]
+        worksheet.write(curr_row, col, f"{code} ({room})", sched_format)
 
         # Draw cell time
         curr_row += 1
