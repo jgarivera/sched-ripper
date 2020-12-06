@@ -1,5 +1,6 @@
 # SchedRipper2
 It is a successor to the SchedRipper tool written in Java. SR2 is primarily written in Python 3.7.4 and XLSXWriter.
+![Screenshot](docs/sr2.png)
 
 ## Features
 * It can consume and parse a subject offering JSON file acquired from the APC Masterlist Subject Offerings page to populate SR2's schedule entries
