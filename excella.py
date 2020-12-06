@@ -8,8 +8,7 @@ class Excella:
         Renders schedules in a Excel spreadsheet
         Properties:
             1. Renders schedule 'blocks' per section
-            2. Limit number of schedule blocks per sheet
-            3. Load officer data into scheds
+            3. Load officer data into scheds as metadata
     """
 
     SCHED_BLOCKS_PER_SHEET = 12
@@ -63,9 +62,6 @@ class Excella:
         self.workbook = xlsxwriter.Workbook(export_name)
         self.entries = entries
         self.has_set_columns = False
-        self.sheet_count = 0
-        self.sheet_sched_blocks_count = 0
-        self.total_sched_blocks_count = 0
 
     def begin(self):
         """
