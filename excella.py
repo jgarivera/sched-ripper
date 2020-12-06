@@ -28,7 +28,8 @@ class Excella:
     DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
     # Color hex strings
-    COLORS = ["#70AD47", "#B4C6E7", "#ED7D31", "#F4B084", "#FFE699", "#C00000", "#4BACC6"]
+    COLORS = ["#70AD47", "#B4C6E7", "#ED7D31",
+              "#F4B084", "#FFE699", "#C00000", "#4BACC6"]
 
     # Time intervals
     INTERVALS = {
@@ -87,7 +88,10 @@ class Excella:
         for entry in officers_json:
             section = entry["section"]
             officers = entry["officers"]
+
+            # Draw schedule of section and its officers
             offset = self.__draw(worksheet, offset, section, officers) + 2
+            self.__log(f"Drew officers schedule of {section}")
 
         # Close file stream
         f.close()
@@ -197,7 +201,7 @@ class Excella:
 
     def __draw_railings(self, worksheet, offset):
         """
-            Draws time rows and day columns
+            Draws the time rows and day columns
         """
         workbook = self.workbook
         curr_row = offset + 1
@@ -224,10 +228,13 @@ class Excella:
         for day in Excella.DAYS:
             worksheet.write(curr_row, curr_col, day, day_format)
             curr_col += 1
-    
+
         return next_row
 
     def __load_buckets(self, section_name):
+        """
+            Loads the schedule objects into their corresponding array buckets. Returns the resulting bucket
+        """
         section = self.entries[section_name]
         buckets = [[] for _ in range(len(Excella.DAYS))]
 
@@ -264,6 +271,9 @@ class Excella:
         return buckets
 
     def __set_columns(self, worksheet):
+        """
+            Set the column styles
+        """
         if not self.has_set_columns:
             # Set column widths
             start = Excella.SCHED_BLOCK_COLUMN_START
@@ -274,26 +284,47 @@ class Excella:
             self.__log("Column stylings has been set")
             self.has_set_columns = True
 
-    def __get_interval(self, interval):
+    def __get_interval(self, time_str):
+        """
+            Gets the integer interval of a time string. Prone to error correction if time string is out of bounds
+        """
         try:
-            interval = Excella.INTERVALS[interval]
+            interval = Excella.INTERVALS[time_str]
         except KeyError:
             # Get nearest interval if not explicitly found in dictionary
-            dt = self.__to_dt(interval)
-            for k in Excella.INTERVALS.keys():
-                if self.__to_dt(k) >= dt:
-                    interval = Excella.INTERVALS[k]
+            dt = self.__to_dt(time_str)
+
+            # Switch AM to PM if its earlier than 7:00 AM
+            if dt < self.__to_dt("07:00 AM"):
+                time_str = time_str.replace("AM", "PM").strip()
+                interval = Excella.INTERVALS[time_str]
+            else:
+                for k in Excella.INTERVALS.keys():
+                    if self.__to_dt(k) >= dt:
+                        interval = Excella.INTERVALS[k]
 
         return interval
 
     def __convert_time(self, military_time):
+        """
+            Converts military time to standard time string
+        """
         return datetime.strptime(military_time, '%H:%M:%S').strftime('%I:%M %p').strip()
 
     def __to_dt(self, time):
+        """
+            Converts time string to standard date time object
+        """
         return datetime.strptime(time, '%I:%M %p')
 
     def __log(self, msg):
+        """
+            Simple logging
+        """
         print(f"[3xc311a]: {msg}")
 
     def close(self):
+        """
+            Closes the workbook file stream
+        """
         self.workbook.close()
