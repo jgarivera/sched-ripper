@@ -8,6 +8,6 @@ if __name__ == "__main__":
     entries = r.get_entries()
 
     # Render ripper entries into Excel spreadsheet
-    e = Excella(entries, "scheds.xlsx") 
+    e = Excella(entries, "officers.json", "scheds.xlsx") 
     e.begin()
     e.close()

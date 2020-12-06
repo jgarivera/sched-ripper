@@ -28,7 +28,7 @@ class Excella:
     DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 
     # Color hex strings
-    COLORS = ["#70AD47", "#B4C6E7", "#ED7D31", "#F4B084", "#FFE699", "#C00000"]
+    COLORS = ["#70AD47", "#B4C6E7", "#ED7D31", "#F4B084", "#FFE699", "#C00000", "#4BACC6"]
 
     # Time intervals
     INTERVALS = {
@@ -57,7 +57,8 @@ class Excella:
         "06:00 PM": 22
     }
 
-    def __init__(self, entries, export_name):
+    def __init__(self, entries, officers_path, export_name):
+        self.officers_path = officers_path
         self.workbook = xlsxwriter.Workbook(export_name)
         self.entries = entries
         self.has_set_columns = False
@@ -69,28 +70,46 @@ class Excella:
         """
             Begins drawing cycle
         """
-        worksheet = self.workbook.add_worksheet()
+        self.__log("Beginning drawing cycle...")
 
         # Set column stylings
+        worksheet = self.workbook.add_worksheet()
         self.__set_columns(worksheet)
 
+        # Begin drawing
         offset = Excella.HORIZONTAL_CELL_OFFSET
-        self.__draw(worksheet, offset, "MI191")
+
+        # Open officers JSON file
+        f = open(self.officers_path)
+        officers_json = json.load(f)
+        idx = 0
+
+        for entry in officers_json:
+            section = entry["section"]
+            officers = entry["officers"]
+            offset = self.__draw(worksheet, offset, section, officers) + 2
+
+        # Close file stream
+        f.close()
 
     def __draw(self, worksheet, offset, section, officers):
         """
             Draws a schedule block given a section and its officers
         """
         buckets = self.__load_buckets(section)
+        curr_offset = offset
 
         # Draw metadata
-        self.__draw_metadata(worksheet, offset, section, officers)
+        curr_offset = self.__draw_metadata(
+            worksheet, curr_offset, section, officers)
 
         # Draw railings
-        self.__draw_railings(worksheet, offset)
+        next_offset = self.__draw_railings(worksheet, curr_offset)
 
         # Draw schedule blocks
-        self.__draw_schedules(worksheet, offset, buckets)
+        self.__draw_schedules(worksheet, curr_offset, buckets)
+
+        return next_offset + 1
 
     def __draw_metadata(self, worksheet, offset, section, officers):
         """
@@ -114,7 +133,14 @@ class Excella:
         pos_format.set_bold(True)
 
         for officer in officers:
-            worksheet.write(curr_row, )
+            position = officer["position"]
+            names = officer["names"]
+
+            worksheet.write(curr_row, pos_col, position, pos_format)
+            worksheet.write(curr_row, officers_col, ", ".join(names))
+            curr_row += 1
+
+        return curr_row + 1
 
     def __draw_schedules(self, worksheet, offset, buckets):
         """
@@ -175,6 +201,7 @@ class Excella:
         """
         workbook = self.workbook
         curr_row = offset + 1
+        next_row = curr_row
 
         # Draw time rows... 7:30 am to 5:00 pm rows
         time_format = workbook.add_format()
@@ -185,6 +212,7 @@ class Excella:
             worksheet.write(
                 curr_row, Excella.SCHED_BLOCK_COLUMN_START, time, time_format)
             curr_row += 1
+            next_row = curr_row
 
         # Draw day columns... Monday to Saturday
         curr_row = offset
@@ -196,6 +224,8 @@ class Excella:
         for day in Excella.DAYS:
             worksheet.write(curr_row, curr_col, day, day_format)
             curr_col += 1
+    
+        return next_row
 
     def __load_buckets(self, section_name):
         section = self.entries[section_name]
@@ -233,6 +263,17 @@ class Excella:
 
         return buckets
 
+    def __set_columns(self, worksheet):
+        if not self.has_set_columns:
+            # Set column widths
+            start = Excella.SCHED_BLOCK_COLUMN_START
+            worksheet.set_column(start, start, Excella.TIME_CELL_WIDTH)
+            worksheet.set_column(
+                start + 1, Excella.SCHED_BLOCK_COLUMN_END, Excella.SCHED_CELL_WIDTH)
+
+            self.__log("Column stylings has been set")
+            self.has_set_columns = True
+
     def __get_interval(self, interval):
         try:
             interval = Excella.INTERVALS[interval]
@@ -251,14 +292,8 @@ class Excella:
     def __to_dt(self, time):
         return datetime.strptime(time, '%I:%M %p')
 
-    def __set_columns(self, worksheet):
-        if not self.has_set_columns:
-            # Set column widths
-            start = Excella.SCHED_BLOCK_COLUMN_START
-            worksheet.set_column(start, start, Excella.TIME_CELL_WIDTH)
-            worksheet.set_column(
-                start + 1, Excella.SCHED_BLOCK_COLUMN_END, Excella.SCHED_CELL_WIDTH)
-            self.has_set_columns = True
+    def __log(self, msg):
+        print(f"[3xc311a]: {msg}")
 
     def close(self):
         self.workbook.close()

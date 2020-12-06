@@ -19,8 +19,11 @@ class Ripper:
         # Parse JSON data from file
         self.__build(json.load(f))
 
+        print("Sections found:")
         for key, value in self.entries.items():
             print(key, end=", ")
+
+        print("\n")
 
         # There are 318 subject offerings
         f.close()
@@ -33,7 +36,7 @@ class Ripper:
 
             if "/" in section:
                 sections = section.split("/")
-                
+
                 for s in sections:
                     self.__build_section(s, entry_data)
             else:
