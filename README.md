@@ -9,7 +9,7 @@ It is a successor to the SchedRipper tool written in Java. SR2 is primarily writ
 
 ## Usage
 * Download zip
-* Provide the necessary JSON files
+* Provide the necessary JSON files such as the subject offering response and officers JSON.
 * Edit `run.py` and execute it using `python run.py`
 * View your generated Excel spreadsheet with the provided `export_name`
 * Voila!
