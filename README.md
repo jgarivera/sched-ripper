@@ -15,5 +15,5 @@ It is a successor to the SchedRipper CLI tool previously written in Java. SchedR
 * Voila!
 
 ## What can be improved and added
-* Maybe the schedules can be rendered into something more efficient than Excel. Native UI using `tkinker`?
+* Maybe the schedules can be rendered into something more efficient than Excel. Native UI using `tkinter`?
 * Implement algorithm to determine a free schedule slot so the organization knows when every member is free for a particular day.
