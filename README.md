@@ -3,15 +3,15 @@ It is a successor to the SchedRipper CLI tool previously written in Java. SchedR
 ![Screenshot](docs/sr2.png)
 
 ## Features
-* It can consume and parse a subject offering JSON file acquired from the APC Masterlist Subject Offerings page to populate SR2's schedule entries
+* It can consume and parse a subject offering JSON file acquired from the APC Masterlist Subject Offerings page to populate SR2's schedule entries.
 * It can parse an officers JSON file to serve as metadata for the Excella renderer.
 * It can render an Excel spreadsheet of the officers' schedules from the provided officers JSON file.
 
 ## Usage
-* Download the source.
-* Provide the necessary JSON files such as the subject offering response and officers JSON.
+* Download the code and install necessary Python dependencies using `pip`
+* Provide the necessary JSON files such as the subject offering response and officers JSON file.
 * Edit `run.py` and execute it using `python run.py`
-* View your generated Excel spreadsheet with the provided `export_name`
+* View your generated Excel spreadsheet with the provided `export_name`.xlsx
 * Voila!
 
 ## What can be improved and added
