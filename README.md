@@ -1,5 +1,5 @@
 # SchedRipper2
-It is a successor to the SchedRipper CLI tool previously written in Java. SchedRipper2 is primarily written in Python 3.7.4 with the XLSXWriter library.
+It is a successor to the SchedRipper CLI tool [previously written in Java](https://github.com/jg-rivera/SchedRipper). SchedRipper2 is primarily written in Python 3.7.4 with the XLSXWriter library.
 ![Screenshot](docs/sr2.png)
 
 ## Features
